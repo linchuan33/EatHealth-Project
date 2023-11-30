@@ -6,149 +6,171 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+
 public class EatHealth extends Application {
-    private static final List<String> MEAT_OPTIONS = Arrays.asList("Chicken", "Beef", "Fish", "Shellfish", "Duck", "Lamb");
-    private static final List<String> CARBOHYDRATE_OPTIONS = Arrays.asList("Rice", "Noodle");
-    private static final List<String> VEGETABLES_OPTIONS = Arrays.asList("Potatoes", "Tomatoes", "Carrots", "Lettuce", "Cucumbers", "Mushrooms");
+   private List<String> meatOptions = new ArrayList<>(Arrays.asList("Chicken", "Beef", "Fish", "Shellfish", "Duck", "Lamb"));
+   private List<String> carbohydrateOptions = new ArrayList<>(Arrays.asList("Rice", "Noodle"));
+   private List<String> vegetablesOptions = new ArrayList<>(Arrays.asList("Potatoes", "Tomatoes", "Carrots", "Lettuce", "Cucumbers", "Mushrooms"));
 
-    private Button pickNowButton;
-    private HBox meatBox, carbohydrateBox, vegetablesBox;
 
-    public static void main(String[] args) {
-        launch(args);
-    }
+   private Button pickNowButton;
+   private VBox meatBox, carbohydrateBox, vegetablesBox;
 
-    @Override
-    public void start(Stage primaryStage) {
-        BorderPane root = new BorderPane();
-        root.setCenter(createOptionsPane());
-        root.setBottom(createPickNowButton());
 
-        Scene scene = new Scene(root, 500, 400);
-        primaryStage.setTitle("EatHealth");
-        primaryStage.setScene(scene);
-        primaryStage.show();
-    }
+   public static void main(String[] args) {
+       launch(args);
+   }
 
-    private HBox createOptionsPane() {
-        meatBox = createFoodBox("Meat", MEAT_OPTIONS);
-        carbohydrateBox = createFoodBox("Carbohydrate", CARBOHYDRATE_OPTIONS);
-        vegetablesBox = createFoodBox("Vegetables", VEGETABLES_OPTIONS);
 
-        HBox optionsPane = new HBox(meatBox, carbohydrateBox, vegetablesBox);
-        optionsPane.setAlignment(Pos.CENTER);
-        optionsPane.setSpacing(20);
-        return optionsPane;
-    }
+   @Override
+   public void start(Stage primaryStage) {
+       BorderPane root = new BorderPane();
+       root.setCenter(createOptionsPane());
+       root.setBottom(createPickNowButton());
 
-    private HBox createFoodBox(String category, List<String> options) {
-        HBox foodBox = new HBox();
-        foodBox.setAlignment(Pos.CENTER);
-        foodBox.setSpacing(10);
 
-        Button addButton = createAddButton(category);
-        foodBox.getChildren().add(addButton);
+       Scene scene = new Scene(root, 500, 400);
+       primaryStage.setTitle("EatHealth");
+       primaryStage.setScene(scene);
+       primaryStage.show();
+   }
 
-        Label categoryLabel = new Label(category + ":");
-        foodBox.getChildren().add(categoryLabel);
 
-        for (String option : options) {
-            HBox optionBox = createOptionBox(option, category);
-            foodBox.getChildren().add(optionBox);
-        }
+   private VBox createOptionsPane() {
+       meatBox = createFoodBox("Meat", meatOptions);
+       carbohydrateBox = createFoodBox("Carbohydrate", carbohydrateOptions);
+       vegetablesBox = createFoodBox("Vegetables", vegetablesOptions);
 
-        return foodBox;
-    }
 
-    private HBox createOptionBox(String option, String category) {
-        HBox optionBox = new HBox();
-        optionBox.setAlignment(Pos.CENTER_LEFT);
+       VBox optionsPane = new VBox(createAddButton(meatOptions), meatBox, createAddButton(carbohydrateOptions), carbohydrateBox, createAddButton(vegetablesOptions), vegetablesBox);
+       optionsPane.setAlignment(Pos.CENTER);
+       optionsPane.setSpacing(20);
+       optionsPane.setFillWidth(true); // Allow children to grow horizontally
+       optionsPane.setPadding(new Insets(20));
 
-        Button deleteButton = createDeleteButton(option, category);
 
-        Label optionLabel = new Label(option);
-        optionLabel.setStyle("-fx-border-color: black; -fx-padding: 5px;");
+       return optionsPane;
+   }
 
-        optionBox.getChildren().addAll(deleteButton, optionLabel);
-        return optionBox;
-    }
 
-    private Button createDeleteButton(String option, String category) {
-        Button deleteButton = new Button("-");
-        deleteButton.setOnAction(e -> {
-            //此处可以从列表中删除所选选项（外形待定）
-            if (MEAT_OPTIONS.remove(option) || CARBOHYDRATE_OPTIONS.remove(option) || VEGETABLES_OPTIONS.remove(option)) {
-                // Update the UI
-                updateOptionsPane();
-            }
-        });
+   private VBox createFoodBox(String category, List<String> options) {
+       VBox foodBox = new VBox();
+       foodBox.setAlignment(Pos.CENTER);
+       foodBox.setSpacing(10);
 
-        return deleteButton;
-    }
 
-    private Button createAddButton(String category) {
-        Button addButton = new Button("+");
-        addButton.setOnAction(e -> {
-            TextInputDialog dialog = new TextInputDialog();
-            dialog.setTitle("Add Option");
-            dialog.setHeaderText("Enter the new " + category.toLowerCase() + " option:");
-            dialog.setContentText("Option:");
+       Label categoryLabel = new Label(category + ":");
+       categoryLabel.setStyle("-fx-font-size: 14;");
+       foodBox.getChildren().add(categoryLabel);
 
-            dialog.showAndWait().ifPresent(newOption -> {
-                // Add the new option to the appropriate list
-                if (category.equals("Meat")) {
-                    MEAT_OPTIONS.add(newOption);
-                } else if (category.equals("Carbohydrate")) {
-                    CARBOHYDRATE_OPTIONS.add(newOption);
-                } else if (category.equals("Vegetables")) {
-                    VEGETABLES_OPTIONS.add(newOption);
-                }
 
-                //UI
-                updateOptionsPane();
-            });
-        });
+       for (String option : options) {
+           HBox optionBox = createOptionBox(option, category, options);
+           foodBox.getChildren().add(optionBox);
+       }
 
-        return addButton;
-    }
 
-    private Button createPickNowButton() {
-        pickNowButton = new Button("Pick Now");
-        pickNowButton.setOnAction(e -> pickNow());
+       return foodBox;
+   }
 
-        VBox pickNowBox = new VBox(pickNowButton);
-        pickNowBox.setAlignment(Pos.CENTER);
-        pickNowBox.setPadding(new Insets(20, 0, 0, 0));
 
-        return pickNowButton;
-    }
+   private HBox createOptionBox(String option, String category, List<String> options) {
+       HBox optionBox = new HBox();
+       optionBox.setAlignment(Pos.CENTER_LEFT);
 
-    private void pickNow() {
-        // 从每个类别中选择一个选项（三大选项分类）
-        String selectedMeat = pickRandomOption(MEAT_OPTIONS);
-        String selectedCarbohydrate = pickRandomOption(CARBOHYDRATE_OPTIONS);
-        String selectedVegetable = pickRandomOption(VEGETABLES_OPTIONS);
 
-        // 显示选项
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Picked Options");
-        alert.setHeaderText(null);
-        alert.setContentText("Meat: " + selectedMeat + "\nCarbohydrate: " + selectedCarbohydrate + "\nVegetables: " + selectedVegetable);
-        alert.showAndWait();
-    }
+       Button deleteButton = createDeleteButton(option, category, options);
 
-    private String pickRandomOption(List<String> options) {
-        Random random = new Random();
-        return options.get(random.nextInt(options.size()));
-    }
 
-    private void updateOptionsPane() {
-        // Re-create选项窗（但是好像没啥用。。。
-        HBox newOptionsPane = createOptionsPane();
-        ((BorderPane) pickNowButton.getParent()).setCenter(newOptionsPane);
-    }
+       Label optionLabel = new Label(option);
+       optionLabel.setStyle("-fx-border-color: black; -fx-padding: 5px;");
+       optionLabel.setStyle("-fx-font-size: 12;");
+
+
+       optionBox.getChildren().addAll(deleteButton, optionLabel);
+       return optionBox;
+   }
+
+
+   private Button createDeleteButton(String option, String category, List<String> options) {
+       Button deleteButton = new Button("-");
+       deleteButton.setOnAction(e -> {
+           if (options.remove(option)) {
+               updateOptionsPane();
+           }
+       });
+
+
+       return deleteButton;
+   }
+
+
+   private Button createAddButton(List<String> options) {
+       Button addButton = new Button("+");
+       addButton.setOnAction(e -> {
+           TextInputDialog dialog = new TextInputDialog();
+           dialog.setTitle("Add Option");
+           dialog.setHeaderText("Enter the new option:");
+           dialog.setContentText("Option:");
+
+
+           dialog.showAndWait().ifPresent(newOption -> {
+               options.add(newOption);
+               updateOptionsPane();
+           });
+       });
+
+
+       return addButton;
+   }
+
+
+   private Button createPickNowButton() {
+       pickNowButton = new Button("Pick Now");
+       pickNowButton.setOnAction(e -> pickNow());
+
+
+       VBox pickNowBox = new VBox(pickNowButton);
+       pickNowBox.setAlignment(Pos.CENTER);
+       pickNowBox.setPadding(new Insets(20, 0, 0, 0));
+
+
+       return pickNowButton;
+   }
+
+
+   private void pickNow() {
+       String selectedMeat = pickRandomOption(meatOptions);
+       String selectedCarbohydrate = pickRandomOption(carbohydrateOptions);
+       String selectedVegetable = pickRandomOption(vegetablesOptions);
+
+
+       Alert alert = new Alert(Alert.AlertType.INFORMATION);
+       alert.setTitle("Picked Options");
+       alert.setHeaderText(null);
+       alert.setContentText("Meat: " + selectedMeat + "\nCarbohydrate: " + selectedCarbohydrate + "\nVegetables: " + selectedVegetable);
+       alert.showAndWait();
+   }
+
+
+   private String pickRandomOption(List<String> options) {
+       Random random = new Random();
+       return options.get(random.nextInt(options.size()));
+   }
+
+
+   private void updateOptionsPane() {
+       VBox newOptionsPane = createOptionsPane();
+       ((BorderPane) pickNowButton.getParent()).setCenter(newOptionsPane);
+   }
 }
+
+
+
+
